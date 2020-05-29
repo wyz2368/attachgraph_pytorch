@@ -44,6 +44,9 @@ def train(game, identity, opponent_mix_str, epoch, writer, save_path: str = None
         learner = learner_factory()
         policy, best_deviation, _, report = learner.learn_multi_nets(env, epoch=epoch, writer=writer, game=game)
 
+    # add online policy, without loading policies every time.
+    game.total_strategies[identity].append(policy)
+
     torch.save(policy, save_path, pickle_module=dill)
     # fp.save_pkl(replay_buffer, save_path[:-4]+".replay_buffer.pkl")
     return best_deviation, report

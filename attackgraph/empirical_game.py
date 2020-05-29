@@ -52,11 +52,11 @@ def init_game(saved_env_name: str = None, env_name: str = None):
 
 @gin.configurable
 class EmpiricalGame(object):
-
     def __init__(self, env, num_episodes, threshold):
         # TODO: check if env should be initial env, this env should be with G_reserved.
         logger.info("Reminder: env in game should be same as the initial one since G should be G_reserved.")
-        self.env = copy.deepcopy(env)
+        # self.env = copy.deepcopy(env)
+        self.env = env
         self.att_str = []
         self.def_str = []
         self.nasheq = {}
@@ -64,6 +64,8 @@ class EmpiricalGame(object):
         self.payoffmatrix_att = np.zeros((1, 1), dtype=np.float32)
         self.dir_def = settings.get_defender_strategy_dir()
         self.dir_att = settings.get_attacker_strategy_dir()
+
+        self.total_strategies = None
 
         # payoff and beneficial deviation
         self.att_BD_list = []

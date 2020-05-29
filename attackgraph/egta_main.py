@@ -27,6 +27,10 @@ flags.DEFINE_string(
     "meta_method",
     "nash",
     "EGTA algorithm.")
+flags.DEFINE_integer(
+    "num_iters",
+    80,
+    "Number of EGTA iterations")
 flags.DEFINE_multi_string(
     "config_files",
     None,

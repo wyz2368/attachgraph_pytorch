@@ -18,6 +18,7 @@ from attackgraph import settings
 class OpponentSampler(object):
 
     env: Any
+    game: Any
     opponent_identity: int
 
     def __post_init__(self):
@@ -27,15 +28,48 @@ class OpponentSampler(object):
     def sample(self):
         # The opponent is the attacker.
         if self.opponent_identity:
-            strategy_dict = self.load_all_policies(self.env, self.env.attacker.str_set, opp_identity=1)
+            strategy_dict = self.load_all_policies(self.game, self.env.attacker.str_set, opp_identity=1)
             self.env.attacker.sample_and_set_str(str_dict=strategy_dict)
 
         else:
-            strategy_dict = self.load_all_policies(self.env, self.env.defender.str_set, opp_identity=0)
+            strategy_dict = self.load_all_policies(self.game, self.env.defender.str_set, opp_identity=0)
             self.env.defender.sample_and_set_str(str_dict=strategy_dict)
 
+    # @staticmethod
+    # def load_all_policies(env, str_set, opp_identity: int):
+    #     """ Load all of the strategies for an agent.
+    #
+    #     :param env:
+    #     :param str_set:
+    #     :param opp_identity: ID of the opponent (0/1 defender/attacker).
+    #     :return: Dictionary from strings to `ActWrapper` policies.
+    #     :rtype: dict
+    #     """
+    #     if opp_identity == 0:  # Pick a defender's strategy.
+    #         path = settings.get_defender_strategy_dir()
+    #     elif opp_identity == 1:
+    #         path = settings.get_attacker_strategy_dir()
+    #     else:
+    #         raise ValueError("identity is neither 0 or 1!")
+    #
+    #     str_dict = {}
+    #     count = 1
+    #
+    #     for picked_str in str_set:
+    #
+    #         # The initial policy is a function, so we do not need to load any parameters.
+    #         if count == 1 and "epoch1" in picked_str:
+    #             str_dict[picked_str] = fp.load_pkl(osp.join(path, picked_str))
+    #             count += 1
+    #             continue
+    #
+    #         # Load the policies parameters for epoch > 1.
+    #         str_dict[picked_str] = torch.load(osp.join(path, picked_str))
+    #
+    #     return str_dict
+
     @staticmethod
-    def load_all_policies(env, str_set, opp_identity: int):
+    def load_all_policies(game, str_set, opp_identity: int):
         """ Load all of the strategies for an agent.
 
         :param env:
@@ -44,25 +78,4 @@ class OpponentSampler(object):
         :return: Dictionary from strings to `ActWrapper` policies.
         :rtype: dict
         """
-        if opp_identity == 0:  # Pick a defender's strategy.
-            path = settings.get_defender_strategy_dir()
-        elif opp_identity == 1:
-            path = settings.get_attacker_strategy_dir()
-        else:
-            raise ValueError("identity is neither 0 or 1!")
-
-        str_dict = {}
-        count = 1
-
-        for picked_str in str_set:
-
-            # The initial policy is a function, so we do not need to load any parameters.
-            if count == 1 and "epoch1" in picked_str:
-                str_dict[picked_str] = fp.load_pkl(osp.join(path, picked_str))
-                count += 1
-                continue
-
-            # Load the policies parameters for epoch > 1.
-            str_dict[picked_str] = torch.load(osp.join(path, picked_str))
-
-        return str_dict
+        return dict(zip(str_set, game.total_strategies[opp_identity]))

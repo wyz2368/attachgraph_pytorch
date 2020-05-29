@@ -38,7 +38,7 @@ def run(load_env, env_name, n_processes):
         osp.join(settings.get_defender_strategy_dir(), "def_str_epoch1.pkl"))
 
     game = initialize(load_env=FLAGS.env, env_name=None, n_processes=n_processes)
-    _run(game.env, game, meta_method_name=FLAGS.meta_method, n_processes=n_processes)
+    _run(game.env, game, meta_method_name=FLAGS.meta_method, num_iters=FLAGS.num_iters, n_processes=n_processes)
 
 
 def initialize(load_env=None, env_name=None, n_processes: int = 1):
@@ -74,6 +74,9 @@ def initialize(load_env=None, env_name=None, n_processes: int = 1):
     game = empirical_game.EmpiricalGame(env)
     game.env.defender.set_env_belong_to(game.env)
     game.env.attacker.set_env_belong_to(game.env)
+
+    # initialize total_strategies
+    game.total_strategies = [[uniform_str_init.act_def], [uniform_str_init.act_att]]
 
     # make no sense
     env.defender.set_env_belong_to(env)
@@ -117,7 +120,7 @@ def initialize(load_env=None, env_name=None, n_processes: int = 1):
     return game
 
 
-def _run(env, game, meta_method_name, epoch: int = 1, game_path: str = None, n_processes: int = 1):
+def _run(env, game, meta_method_name, num_iters, epoch: int = 1, game_path: str = None, n_processes: int = 1):
     assert n_processes > 0, "Invalid number of processors."
     if game_path is None:
         game_path = osp.join(settings.get_run_dir(), "game.pkl")
@@ -131,7 +134,7 @@ def _run(env, game, meta_method_name, epoch: int = 1, game_path: str = None, n_p
 
     selector = meta_method_selector(meta_method_name)
 
-    count = 80
+    count = num_iters
     while count != 0:
         mem0 = proc.memory_info().rss
 
@@ -139,6 +142,7 @@ def _run(env, game, meta_method_name, epoch: int = 1, game_path: str = None, n_p
         mix_str_def, mix_str_att = selector.sample(game, epoch)
 
         # Save mixed strategies.
+        #TODO: where we use this?
         with open(osp.join(result_dir, f"mix_defender.{epoch}.pkl"), "wb") as outfile:
             pickle.dump(mix_str_def, outfile)
         with open(osp.join(result_dir, f"mix_attacker.{epoch}.pkl"), "wb") as outfile:

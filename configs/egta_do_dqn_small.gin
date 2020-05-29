@@ -8,7 +8,7 @@ import attackgraph.empirical_game
 
 
 # EGTA algorithm.
-attackgraph.double_oracle.run.n_processes = 2
+attackgraph.double_oracle.run.n_processes = 1
 
 
 # Learning algorithm.
@@ -24,10 +24,10 @@ Learner.gamma = 0.99
 Learner.prioritized_replay = False
 Learner.param_noise = False
 
-attacker/Learner.total_timesteps = 70000
+attacker/Learner.total_timesteps = 100000
 attacker/Learner.exploration_fraction = 0.2
 
-defender/Learner.total_timesteps = 100000
+defender/Learner.total_timesteps = 120000
 defender/Learner.exploration_fraction = 0.3
 
 

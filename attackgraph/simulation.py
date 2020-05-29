@@ -53,13 +53,13 @@ def simulate_expanded_game(game, n_processes: int = 1, save_dir: str = None, sum
     # TODO: check the path is correct
     for pos in position_col_list:
         idx_def, idx_att = pos
-        aReward, dReward = simulate_profile(env, game, att_str_list[idx_att], def_str_list[idx_def], num_episodes, n_processes, save_dir=save_dir, summary_writer=summary_writer)
+        aReward, dReward = simulate_profile(env, game, att_str_list[idx_att], def_str_list[idx_def], pos, num_episodes, n_processes, save_dir=save_dir, summary_writer=summary_writer, pos=pos)
         att_col.append(aReward)
         def_col.append(dReward)
 
     for pos in position_row_list:
         idx_def, idx_att = pos
-        aReward, dReward = simulate_profile(env, game, att_str_list[idx_att], def_str_list[idx_def], num_episodes, n_processes, save_dir=save_dir, summary_writer=summary_writer)
+        aReward, dReward = simulate_profile(env, game, att_str_list[idx_att], def_str_list[idx_def], num_episodes, n_processes, save_dir=save_dir, summary_writer=summary_writer, pos=pos)
         att_row.append(aReward)
         def_row.append(dReward)
 
@@ -73,7 +73,7 @@ def simulate_expanded_game(game, n_processes: int = 1, save_dir: str = None, sum
 
 
 @gin.configurable
-def simulate_profile(env, game, nn_att, nn_def, n_episodes: int, n_processes: int = 2, save_dir: str = None, summary_writer=None, raw_rewards: bool = False, collect_trajectories: bool = False):
+def simulate_profile(env, game, nn_att, nn_def, n_episodes: int, n_processes: int = 2, save_dir: str = None, summary_writer=None, raw_rewards: bool = False, collect_trajectories: bool = False, pos=None):
     """ Simulate a payoff from two pure-strategies.
 
     Resources:
@@ -104,6 +104,7 @@ def simulate_profile(env, game, nn_att, nn_def, n_episodes: int, n_processes: in
                 game=game,
                 nn_att=nn_att,
                 nn_def=nn_def,
+                pos=pos,
                 n_episodes=n_episodes,
                 save_dir=save_dir,
                 summary_writer=summary_writer,
@@ -183,7 +184,7 @@ class SimulationWorker(multiprocessing.Process):
             self.attacker_reward_queue.put(attacker_reward)
 
 
-def _simulate_in_series(env, game, nn_att, nn_def, n_episodes: int, save_dir: str = None, summary_writer=None, collect_trajectories: bool=False):
+def _simulate_in_series(env, game, nn_att, nn_def, pos, n_episodes: int, save_dir: str = None, summary_writer=None, collect_trajectories: bool=False):
     """ Run simulations in series on a single processor. """
     attacker_rewards = np.zeros([n_episodes])
     defender_rewards = np.zeros([n_episodes])
@@ -198,7 +199,8 @@ def _simulate_in_series(env, game, nn_att, nn_def, n_episodes: int, save_dir: st
                 nn_def,
                 settings.get_attacker_strategy_dir(),
                 settings.get_defender_strategy_dir(),
-                collect_trajectories)
+                collect_trajectories,
+                pos)
             trajectories += [traj]
         else:
             defender_reward, attacker_reward = _run_simulation(
@@ -207,7 +209,8 @@ def _simulate_in_series(env, game, nn_att, nn_def, n_episodes: int, save_dir: st
                 nn_def,
                 settings.get_attacker_strategy_dir(),
                 settings.get_defender_strategy_dir(),
-                collect_trajectories)
+                collect_trajectories,
+                pos)
         attacker_rewards[episode_i] = attacker_reward
         defender_rewards[episode_i] = defender_reward
 
@@ -253,7 +256,7 @@ def _simulate_in_parallel(env, game, nn_att, nn_def, n_processes: int, n_episode
     return attacker_rewards, defender_rewards
 
 
-def _run_simulation(game, nn_att_saved, nn_def_saved, attacker_dir, defender_dir, collect_trajectories: bool=False):
+def _run_simulation(game, nn_att_saved, nn_def_saved, attacker_dir, defender_dir, collect_trajectories: bool=False, pos=None):
     """ Simulate a single episode. """
     env = game.env
     env.reset_everything()
@@ -266,44 +269,59 @@ def _run_simulation(game, nn_att_saved, nn_def_saved, attacker_dir, defender_dir
     aReward = 0
     dReward = 0
 
-    # Load attacker.
+
     nn_att = copy.copy(nn_att_saved)
-    if isinstance(nn_att, np.ndarray):
-        str_set = game.att_str
-        nn_att = np.random.choice(str_set, p=nn_att)
-
-    path = osp.join(attacker_dir, nn_att)
-    try:
-        nn_att_act = torch.load(path)
-    except:
-        nn_att_act = fp.load_pkl(path)
-
-    # Load defender.
     nn_def = copy.copy(nn_def_saved)
-    if isinstance(nn_def, np.ndarray):
-        str_set = game.def_str
-        nn_def = np.random.choice(str_set, p=nn_def)
+    if pos is not None:
+        idx_def, idx_att = pos
+        # Load attacker.
+        if isinstance(nn_att, np.ndarray):
+            str_set = game.total_strategies[1]
+            nn_att_act = np.random.choice(str_set, p=nn_att)
+        else:
+            nn_att_act = game.total_strategies[1][idx_att]
+        # Load defender.
+        if isinstance(nn_def, np.ndarray):
+            str_set = game.total_strategies[0]
+            nn_def_act = np.random.choice(str_set, p=nn_def)
+        else:
+            nn_def_act = game.total_strategies[0][idx_def]
+    else:
+        # Load attacker.
+        if isinstance(nn_att, np.ndarray):
+            str_set = game.att_str
+            nn_att = np.random.choice(str_set, p=nn_att)
 
-    path = osp.join(defender_dir, nn_def)
-    try:
-        nn_def_act = torch.load(path)
-    except:
-        nn_def_act = fp.load_pkl(path)
+        path = osp.join(attacker_dir, nn_att)
+        try:
+            nn_att_act = torch.load(path)
+        except:
+            nn_att_act = fp.load_pkl(path)
+
+        # Load defender.
+        if isinstance(nn_def, np.ndarray):
+            str_set = game.def_str
+            nn_def = np.random.choice(str_set, p=nn_def)
+
+        path = osp.join(defender_dir, nn_def)
+        try:
+            nn_def_act = torch.load(path)
+        except:
+            nn_def_act = fp.load_pkl(path)
 
     if collect_trajectories:
         traj = []
         exp = {}
 
     for t in range(T):
-        timeleft = T - t
 
         if collect_trajectories:
             exp["observations"] = {}
-            exp["observations"]["attacker"] = attacker.att_obs_constructor(G, timeleft)
-            exp["observations"]["defender"] = defender.def_obs_constructor(G, timeleft)
+            exp["observations"]["attacker"] = attacker.att_obs_constructor()
+            exp["observations"]["defender"] = defender.def_obs_constructor(G)
 
-        attacker.att_greedy_action_builder_single(G, timeleft, nn_att_act)
-        defender.def_greedy_action_builder_single(G, timeleft, nn_def_act)
+        attacker.att_greedy_action_builder_single(G, nn_att_act)
+        defender.def_greedy_action_builder_single(G, nn_def_act)
 
         att_action_set = attacker.attact
         def_action_set = defender.defact

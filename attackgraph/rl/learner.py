@@ -96,6 +96,7 @@ class Learner(object):
         # Sample our initial opponent's strategy.
         opponent_sampler = OpponentSampler(
             env=env,
+            game=game,
             opponent_identity=0 if training_attacker else 1)
         opponent_sampler.sample()
 
