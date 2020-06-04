@@ -275,42 +275,42 @@ class Learner(object):
                 # Simulate performance.
 
                 # Save the current model.
-                current_model_path = osp.join(temp_dir.name, f"model_{t}.pt")
-                torch.save(best_responder, current_model_path, pickle_module=dill)
-
-                sim_rewards = []
-                sim_vars = []
-
-                for mix_coeff, opponent_path in zip(opponent_mixture, opponent_paths):
-                    if training_attacker:
-                        rewards, _ = simulate_profile(
-                            env=copy.deepcopy(env),
-                            game=copy.deepcopy(game),
-                            nn_att=current_model_path,
-                            nn_def=opponent_path,
-                            n_episodes=game.num_episodes,
-                            n_processes=1,
-                            save_dir=None,
-                            summary_writer=None,
-                            raw_rewards=True)
-                    else:
-                        _, rewards = simulate_profile(
-                            env=copy.deepcopy(env),
-                            game=copy.deepcopy(game),
-                            nn_att=opponent_path,
-                            nn_def=current_model_path,
-                            n_episodes=game.num_episodes,
-                            n_processes=1,
-                            save_dir=None,
-                            summary_writer=None,
-                            raw_rewards=True)
-
-                    sim_rewards += [mix_coeff * np.mean(rewards)]
-                    sim_vars += [mix_coeff**2 * np.std(rewards)**2]
-
-                # Report simulation results.
-                writer.add_scalar(f"{log_prefix}/sim/reward_mean", np.sum(sim_rewards))
-                writer.add_scalar(f"{log_prefix}/sim/reward_std", np.sqrt(np.sum(sim_vars)))
+                # current_model_path = osp.join(temp_dir.name, f"model_{t}.pt")
+                # torch.save(best_responder, current_model_path, pickle_module=dill)
+                #
+                # sim_rewards = []
+                # sim_vars = []
+                #
+                # for mix_coeff, opponent_path in zip(opponent_mixture, opponent_paths):
+                #     if training_attacker:
+                #         rewards, _ = simulate_profile(
+                #             env=copy.deepcopy(env),
+                #             game=copy.deepcopy(game),
+                #             nn_att=current_model_path,
+                #             nn_def=opponent_path,
+                #             n_episodes=game.num_episodes,
+                #             n_processes=1,
+                #             save_dir=None,
+                #             summary_writer=None,
+                #             raw_rewards=True)
+                #     else:
+                #         _, rewards = simulate_profile(
+                #             env=copy.deepcopy(env),
+                #             game=copy.deepcopy(game),
+                #             nn_att=opponent_path,
+                #             nn_def=current_model_path,
+                #             n_episodes=game.num_episodes,
+                #             n_processes=1,
+                #             save_dir=None,
+                #             summary_writer=None,
+                #             raw_rewards=True)
+                #
+                #     sim_rewards += [mix_coeff * np.mean(rewards)]
+                #     sim_vars += [mix_coeff**2 * np.std(rewards)**2]
+                #
+                # # Report simulation results.
+                # writer.add_scalar(f"{log_prefix}/sim/reward_mean", np.sum(sim_rewards))
+                # writer.add_scalar(f"{log_prefix}/sim/reward_std", np.sqrt(np.sum(sim_vars)))
                 # ======================================================
 
             # Periodically save a snapshot of our best-responder.
