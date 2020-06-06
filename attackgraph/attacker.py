@@ -64,7 +64,7 @@ class Attacker(object):
 
     # construct the input of the neural network
     def att_obs_constructor(self):
-        canAttack, inAttackSet = self.get_att_inAttackSet()
+        inAttackSet = self.get_att_inAttackSet()
         att_input = self.observation + inAttackSet
         return np.array(att_input, dtype=np.float32)
 
