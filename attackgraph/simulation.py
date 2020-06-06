@@ -115,6 +115,7 @@ def simulate_profile(env, game, nn_att, nn_def, n_episodes: int, n_processes: in
                 game=game,
                 nn_att=nn_att,
                 nn_def=nn_def,
+                pos=pos,
                 n_episodes=n_episodes,
                 save_dir=save_dir,
                 summary_writer=summary_writer,
