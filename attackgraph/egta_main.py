@@ -53,7 +53,7 @@ def main(argv):
     if osp.exists(run_dir):
         print("Cannot resume previously saved run, overwriting data.")
     else:
-        os.mkdir(run_dir)
+        os.makedirs(run_dir)
 
         sub_dirs = [
             "attacker_policies",

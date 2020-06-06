@@ -8,7 +8,7 @@ FLAGS = flags.FLAGS
 
 # Source code directory.
 SRC_DIR = osp.dirname(osp.abspath(__file__))
-# SRC_DIR = osp.join(SRC_DIR, "..")
+SRC_DIR = osp.join(SRC_DIR, "..")
 
 
 def get_results_dir():
