@@ -12,7 +12,7 @@ from absl import app, flags
 
 import attackgraph.settings as settings
 from attackgraph import double_oracle
-from attackgraph.rl.dqn.dqn import DQN
+
 
 # Command line flags.
 flags.DEFINE_string(

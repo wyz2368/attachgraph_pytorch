@@ -791,11 +791,11 @@ class Environment(object):
     def obs_dim_att(self):
         num_andnode, _ = self.get_ANDnodes()
         num_oredges, _ = self.get_ORedges()
-        return self.G.number_of_nodes() + 2*(num_andnode + num_oredges) + 1
+        return self.G.number_of_nodes() + num_andnode + num_oredges
 
     def obs_dim_def(self):
         N = self.G.number_of_nodes()
-        return self.history*N*2 + N + 1  # NO CNN
+        return self.history*N*2 + N   # NO CNN
 
     def act_dim_att(self):
         num_andnode, _ = self.get_ANDnodes()
