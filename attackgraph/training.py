@@ -7,7 +7,7 @@ import torch
 
 import attackgraph.common.file_ops as fp
 from attackgraph import settings
-from attackgraph.rl import learner_factory
+from attackgraph.rl.learner_factory import learner_factory
 
 
 def train(game, identity, opponent_mix_str, epoch, writer, save_path: str = None, scope: str = None):
