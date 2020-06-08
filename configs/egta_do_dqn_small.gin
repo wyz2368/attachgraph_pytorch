@@ -1,5 +1,5 @@
 import attackgraph
-import attackgraph.rl.dqn
+import attackgraph.rl.dqn.dqn
 import attackgraph.rl.learner
 import attackgraph.rl.learner_factory
 import attackgraph.rl.modules.mlp
@@ -24,10 +24,10 @@ Learner.gamma = 0.99
 Learner.prioritized_replay = False
 Learner.param_noise = False
 
-attacker/Learner.total_timesteps = 100000
+attacker/Learner.total_timesteps = 150000
 attacker/Learner.exploration_fraction = 0.2
 
-defender/Learner.total_timesteps = 120000
+defender/Learner.total_timesteps = 150000
 defender/Learner.exploration_fraction = 0.3
 
 

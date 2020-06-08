@@ -1,5 +1,5 @@
 import attackgraph
-import attackgraph.rl.dqn
+import attackgraph.rl.dqn.dqn
 import attackgraph.rl.learner
 import attackgraph.rl.learner_factory
 import attackgraph.rl.modules.mlp
