@@ -53,7 +53,7 @@ def simulate_expanded_game(game, n_processes: int = 1, save_dir: str = None, sum
     # TODO: check the path is correct
     for pos in position_col_list:
         idx_def, idx_att = pos
-        aReward, dReward = simulate_profile(env, game, att_str_list[idx_att], def_str_list[idx_def], pos, num_episodes, n_processes, save_dir=save_dir, summary_writer=summary_writer, pos=pos)
+        aReward, dReward = simulate_profile(env, game, att_str_list[idx_att], def_str_list[idx_def], num_episodes, n_processes, save_dir=save_dir, summary_writer=summary_writer, pos=pos)
         att_col.append(aReward)
         def_col.append(dReward)
 
